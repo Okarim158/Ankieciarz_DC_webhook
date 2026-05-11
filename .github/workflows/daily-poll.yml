@@ -1,0 +1,25 @@
+name: Daily Poll
+
+on:
+  schedule:
+    # Czas jest w UTC. GitHub Actions nie obsługuje stref czasowych.
+    # Aktualnie ustawione: 7:00 UTC = 9:00 CEST (lato) / 8:00 CET (zima)
+    # Edytuj poniżej dla innej godziny. Składnia cron: "minuta godzina * * *"
+    - cron: '0 7 * * *'
+
+  # Pozwala odpalić ręcznie z UI GitHuba (zakładka Actions → Daily Poll → Run workflow)
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: node send-poll.mjs
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
