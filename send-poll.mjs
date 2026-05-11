@@ -21,11 +21,27 @@ const url = `${webhookUrl}?wait=true`;
 const payload = {
   poll: {
     question: { text: config.question },
-    answers: config.options.map(text => ({ poll_media: { text } })),
+    answers: config.options.map(parseOption),
     duration: config.duration_hours ?? 24,
     allow_multiselect: config.multiselect ?? false,
   },
 };
+
+function parseOption(raw) {
+  // Wykryj custom emoji na początku: <:name:id> lub <a:name:id> (animowane)
+  const match = raw.match(/^<(a)?:(\w+):(\d+)>\s*(.*)$/);
+  if (match) {
+    const [, animated, name, id, text] = match;
+    return {
+      poll_media: {
+        text: (text.trim() || name).slice(0, 55),
+        emoji: { id, name, animated: Boolean(animated) },
+      },
+    };
+  }
+  // Zwykły tekst (unicode emoji jak 👍 działa wtedy inline w tekście)
+  return { poll_media: { text: raw } };
+}
 
 // Opcjonalny tekst nad ankietą (np. ping roli).
 // Webhook domyślnie nie pinguje ról nieoznaczonych jako "Mentionable",
