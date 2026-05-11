@@ -1,0 +1,6 @@
+{
+  "question": "Jak się dziś czujesz?",
+  "options": ["Super 🚀", "Ok 👍", "Średnio 😐", "Słabo 😩"],
+  "duration_hours": 24,
+  "multiselect": false
+}
