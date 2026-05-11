@@ -58,6 +58,7 @@ Edytuj `poll.json`, commituj, pushuj. Następna ankieta od razu używa nowej kon
 
 ```json
 {
+  "content": "<@&1491323320774430880>",
   "question": "Twoje pytanie",
   "options": ["Opcja 1", "Opcja 2", "Opcja 3"],
   "duration_hours": 24,
@@ -65,9 +66,14 @@ Edytuj `poll.json`, commituj, pushuj. Następna ankieta od razu używa nowej kon
 }
 ```
 
+- `content` *(opcjonalne)*: tekst który pojawi się nad ankietą. Możesz tu wkleić ping roli (`<@&ID_ROLI>`), pojedynczego usera (`<@ID_USERA>`), albo zwykły tekst typu *"Cześć, nowa ankieta!"*. Skrypt automatycznie wyciąga ID-ki i pinguje. Działa też `@everyone` i `@here`. Jeśli pomijasz to pole, ankieta idzie sucho bez tekstu.
 - `options`: 2-10 sztuk, każda do 55 znaków.
 - `duration_hours`: 1-768 (max tydzień).
 - `multiselect`: czy można wybrać więcej niż jedną opcję.
+
+### Jak skopiować ID roli z Discorda
+
+Najprościej: na serwerze napisz `\@nazwa-roli` (z backslashem) → Discord pokaże raw text `<@&123456789>`, skopiuj. Albo włącz Developer Mode (Ustawienia użytkownika → Advanced → Developer Mode), potem PPM na rolę → Copy Role ID — ale wtedy musisz sam owinąć w `<@&...>`.
 
 ## Uwaga o niezawodności cronu
 

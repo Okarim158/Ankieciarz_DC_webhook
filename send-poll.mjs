@@ -27,6 +27,22 @@ const payload = {
   },
 };
 
+// Opcjonalny tekst nad ankietą (np. ping roli).
+// Webhook domyślnie nie pinguje ról nieoznaczonych jako "Mentionable",
+// więc wyciągamy ID-ki ról i userów ręcznie do allowed_mentions.
+if (config.content) {
+  payload.content = config.content;
+
+  const roleIds = [...config.content.matchAll(/<@&(\d+)>/g)].map(m => m[1]);
+  const userIds = [...config.content.matchAll(/<@(\d+)>/g)].map(m => m[1]);
+
+  const parse = [];
+  if (config.content.includes('@everyone')) parse.push('everyone');
+  if (config.content.includes('@here')) parse.push('here');
+
+  payload.allowed_mentions = { parse, roles: roleIds, users: userIds };
+}
+
 const res = await fetch(url, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
