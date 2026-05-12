@@ -3,7 +3,6 @@ name: Daily Poll
 on:
   schedule:
     # Czas jest w UTC. GitHub Actions nie obsługuje stref czasowych.
-    # Aktualnie ustawione: 7:00 UTC = 9:00 CEST (lato) / 8:00 CET (zima)
     # Edytuj poniżej dla innej godziny. Składnia cron: "minuta godzina * * *"
     - cron: '45 8 * * *'
 
