@@ -4,7 +4,7 @@ on:
   schedule:
     # Czas jest w UTC. GitHub Actions nie obsługuje stref czasowych.
     # Edytuj poniżej dla innej godziny. Składnia cron: "minuta godzina * * *"
-    - cron: '45 8 * * *'
+    - cron: '45 7 * * *'
 
   # Pozwala odpalić ręcznie z UI GitHuba (zakładka Actions → Daily Poll → Run workflow)
   workflow_dispatch:
