@@ -6,8 +6,8 @@ const CONFIG = {
   question: "Among us o 19?",
   options: [
     "<a:90800amonguskiss:1497602951693336576> Będę",
-    "<a:76523pepesadamongus:1497602937248288779> Nie będę",
-    "<a:58428thickandsussy:1497602977836306573> Będę o 20",
+    "<:76523pepesadamongus:1497602937248288779> Nie będę",
+    "<:58428thickandsussy:1497602977836306573> Będę o 20",
     "<a:29950amongusinspace:1497602968005120040> Będę o 21",
   ],
   duration_hours: 24,
