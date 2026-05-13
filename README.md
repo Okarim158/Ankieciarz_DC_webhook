@@ -1,90 +1,105 @@
-# Daily Discord Poll
+# Daily Discord Poll — Cloudflare Workers
 
-Codzienna ankieta na Discordzie, wysyłana automatycznie przez GitHub Actions. Zero hostingu, zero kosztów, zero maintenance.
+Niezawodna codzienna ankieta na Discordzie, postawiona na Cloudflare Workers Cron Triggers.
 
-## Co to robi
+## Co i czemu
 
-Codziennie o ustalonej godzinie GitHub Actions odpala skrypt, który POST-uje natywną ankietę Discorda przez webhook na wybrany kanał. Działa dopóki istnieje repo i webhook.
+- **Cron Triggers** odpalają Worker według harmonogramu. Cloudflare deklaruje *near-real-time precision* — w praktyce w ciągu kilku sekund od ustalonej godziny. Bez peak-hours, bez "best effort" jak na GitHubie.
+- **Free tier**: 100 000 requestów/dzień, cron triggers w cenie. Codzienna ankieta to **1 request dziennie** — nigdy w życiu nie wyjdziesz z free.
+- **Bez serwera, bez maintenance, bez `npm install`** — Cloudflare uruchamia kod na swojej edge infrastrukturze.
 
-## Setup (5 minut)
+## Setup (8 minut)
 
-### 1. Stwórz webhook na Discordzie
+### 1. Konto Cloudflare
 
-1. Wejdź na kanał, na którym mają się pojawiać ankiety.
-2. Kliknij ikonkę koła zębatego obok nazwy kanału → **Integrations** → **Webhooks** → **New Webhook**.
-3. Nazwij webhooka (np. "Daily Poll Bot"), opcjonalnie ustaw avatar.
-4. Kliknij **Copy Webhook URL**. Skopiowany URL ma postać `https://discord.com/api/webhooks/<id>/<token>`.
+Wejdź na [dash.cloudflare.com](https://dash.cloudflare.com/) i zarejestruj się. Nic nie wymaga karty kredytowej dla Workers free tier.
 
-> ⚠️ Ten URL = dostęp do wysyłania wiadomości na Twój kanał. Nie wrzucaj go do kodu, nie commituj, nie pokazuj nikomu.
+### 2. Utwórz Worker
 
-### 2. Stwórz repo na GitHubie
+1. W menu po lewej: **Workers & Pages** → **Create application** → zakładka **Create Worker**.
+2. **Worker name**: `daily-poll` (część URL-a, np. `daily-poll.twoj-user.workers.dev` — ale my i tak go nie będziemy używać).
+3. **Deploy**.
 
-1. Stwórz nowe repo (może być prywatne — limit minut na GitHub Actions jest hojny, codzienna ankieta zżera ~3 sekundy).
-2. Skopiuj do niego wszystkie pliki z tego katalogu.
-3. Commit + push.
+### 3. Wklej kod
 
-### 3. Dodaj webhook URL jako sekret
+1. Po utworzeniu Workera kliknij **Edit code** (prawy górny).
+2. Zaznacz całą zawartość pliku `worker.js` (po lewej, plik startowy) i zastąp ją zawartością z tego repo (plik `worker.js`).
+3. **Save and deploy** (prawy górny).
 
-W repo na GitHubie:
+### 4. Dodaj sekrety
 
-1. **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
-2. **Name:** `DISCORD_WEBHOOK_URL`
-3. **Value:** wklej skopiowany URL webhooka.
-4. **Add secret**.
+1. Wróć do strony Workera (Back to dashboard).
+2. **Settings** → **Variables and Secrets** → **Add**.
+3. Pierwszy sekret:
+   - **Type**: `Secret`
+   - **Variable name**: `DISCORD_WEBHOOK_URL`
+   - **Value**: pełny URL webhooka (`https://discord.com/api/webhooks/...`)
+4. **Save and deploy**.
+5. **Add** drugi sekret:
+   - **Type**: `Secret`
+   - **Variable name**: `TRIGGER_TOKEN`
+   - **Value**: dowolny losowy string, najlepiej długi i nieoczywisty (np. wygeneruj z [random.org/strings](https://www.random.org/strings/) albo wymyśl typu `dziadekTakSilnyPies42!`). Ten token chroni endpoint testowy przed losowymi requestami z internetu.
+6. **Save and deploy**.
 
-### 4. Ustaw godzinę
+### 5. Ustaw cron trigger
 
-Otwórz `.github/workflows/daily-poll.yml` i edytuj linię z `cron`. Format: `'minuta godzina * * *'` w **UTC**.
+1. **Settings** → **Triggers** → sekcja **Cron Triggers** → **Add Cron Trigger**.
+2. Wpisz wyrażenie cron (UTC, jak na GitHubie):
+   - `45 8 * * *` → 10:45 PL latem / 9:45 PL zimą
+   - `0 17 * * *` → 19:00 PL latem / 18:00 PL zimą
+   - itd.
+3. **Add trigger**.
 
-| Czas w PL  | Lato (CEST = UTC+2) | Zima (CET = UTC+1) |
-|------------|---------------------|--------------------|
-| 8:00       | `0 6 * * *`         | `0 7 * * *`        |
-| 9:00       | `0 7 * * *`         | `0 8 * * *`        |
-| 10:00      | `0 8 * * *`         | `0 9 * * *`        |
-| 12:00      | `0 10 * * *`        | `0 11 * * *`       |
-| 20:00      | `0 18 * * *`        | `0 19 * * *`       |
+### 6. Test ręczny
 
-Niestety GitHub Actions nie ogarnia stref czasowych — pojedynczy cron jest w UTC i nie zmienia się z DST. Dwa wyjścia:
-- Zostaw jeden cron i raz na pół roku (przy zmianie czasu) edytuj godzinę.
-- Albo dodaj dwa wpisy cron i zaakceptuj fakt, że przez kilka dni w roku (między DST a edycją) godzina będzie przesunięta.
-
-### 5. Test
-
-Idź do zakładki **Actions** w swoim repo → **Daily Poll** → **Run workflow** → przycisk **Run workflow**. Workflow odpali się ręcznie i jeśli wszystko gra — za kilkanaście sekund na Twoim kanale Discordzie pojawi się ankieta. Jak nie — w logu workflow zobaczysz co poszło nie tak.
-
-## Zmiana pytania / opcji
-
-Edytuj `poll.json`, commituj, pushuj. Następna ankieta od razu używa nowej konfiguracji.
-
-```json
-{
-  "content": "<@&1491323320774430880>",
-  "question": "Twoje pytanie",
-  "options": ["Opcja 1", "Opcja 2", "Opcja 3"],
-  "duration_hours": 24,
-  "multiselect": false
-}
-```
-
-- `content` *(opcjonalne)*: tekst który pojawi się nad ankietą. Możesz tu wkleić ping roli (`<@&ID_ROLI>`), pojedynczego usera (`<@ID_USERA>`), albo zwykły tekst typu *"Cześć, nowa ankieta!"*. Skrypt automatycznie wyciąga ID-ki i pinguje. Działa też `@everyone` i `@here`. Jeśli pomijasz to pole, ankieta idzie sucho bez tekstu.
-- `options`: 2-10 sztuk, każda do 55 znaków.
-- `duration_hours`: 1-768 (max tydzień).
-- `multiselect`: czy można wybrać więcej niż jedną opcję.
-
-### Jak skopiować ID roli z Discorda
-
-Najprościej: na serwerze napisz `\@nazwa-roli` (z backslashem) → Discord pokaże raw text `<@&123456789>`, skopiuj. Albo włącz Developer Mode (Ustawienia użytkownika → Advanced → Developer Mode), potem PPM na rolę → Copy Role ID — ale wtedy musisz sam owinąć w `<@&...>`.
-
-## Uwaga o niezawodności cronu
-
-GitHub Actions cron jest *best effort* — może być opóźniony o 5-30 minut przy dużym obciążeniu ich infrastruktury. W skrajnych przypadkach (rzadko) pojedyncze odpalenie może zostać pominięte. Dla codziennej ankiety w stylu "morning check-in" to bez znaczenia. Dla rzeczy time-critical (np. ankieta dokładnie 5 minut przed eventem) — to nie jest właściwe narzędzie.
-
-## Pliki
+Wejdź w przeglądarce na:
 
 ```
-.
-├── .github/workflows/daily-poll.yml   # cron + odpalenie skryptu
-├── send-poll.mjs                       # logika wysyłki (Node 20, zero zależności)
-├── poll.json                           # treść ankiety
-└── README.md                           # ten plik
+https://daily-poll.TWOJ-USER.workers.dev/?token=TWOJ_TRIGGER_TOKEN
 ```
+
+(URL Workera widzisz w sekcji **Settings → Domains & Routes**, albo w dashboardzie zaraz po wejściu w Workera.)
+
+Jeśli wszystko gra — w przeglądarce zobaczysz `✅ Ankieta wysłana: "..."`, a na Discordzie pojawi się ankieta.
+
+### 7. Test crona z dashboardu
+
+Możesz też wymusić odpalenie scheduled handlera bez czekania na faktyczną godzinę:
+
+1. Wejdź w Workera → **Settings** → **Triggers** → przy cron triggerze powinien być przycisk **Test** (lub w zakładce **Logs** "Trigger Cron Event").
+2. Kliknij, Cloudflare odpali Worker tak jakby to był prawdziwy cron event.
+3. Sprawdź **Logs** czy zobaczyłeś `✅ Ankieta wysłana: "..."`.
+
+## Zmiana ankiety
+
+Edytujesz obiekt `CONFIG` na górze pliku `worker.js`. **Save and deploy**. Następna ankieta używa nowej konfiguracji.
+
+## Zmiana godziny
+
+**Settings → Triggers → Cron Triggers** → edycja istniejącego triggera albo dodanie nowego.
+
+Możesz mieć wiele triggerów na jeden Worker — np. ranny i wieczorny:
+- `45 8 * * *` — 10:45 PL latem
+- `0 17 * * *` — 19:00 PL latem
+
+## Logi
+
+**Workers & Pages** → wejdź w `daily-poll` → zakładka **Logs**. Tail-uje na żywo, widać każde odpalenie scheduled i ich wynik (`✅` albo error). Mocno przydatne do debugowania.
+
+## Limity free tier
+
+- **100 000 requestów/dzień** (1 codzienna ankieta = 0.001% limitu)
+- **10 ms CPU time per request** (zmieścimy się w ~1-2 ms — sam fetch do Discorda)
+- **Cron triggers**: 3 na konto (free), 30 na konto (paid). My używamy jednego.
+
+## Architektura
+
+```
+[Cloudflare Cron Scheduler]
+        ↓ (codziennie o ustalonej godzinie)
+[Worker scheduled handler]
+        ↓ (fetch z DISCORD_WEBHOOK_URL)
+[Discord]
+```
+
+Worker wykonuje się tylko w momencie wywołania — przez resztę dnia nie zżera nic, nie istnieje, nie ma stanu. Idealnie pasuje do takich zadań.
