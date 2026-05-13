@@ -1,0 +1,12 @@
+name = "ankieciarz-dc-webhook"
+main = "worker.js"
+compatibility_date = "2026-05-01"
+
+# Cron Triggers — odpalają handler `scheduled` w worker.js o ustalonych godzinach (UTC).
+# Składnia: "minuta godzina dzień_miesiąca miesiąc dzień_tygodnia"
+# Przykłady:
+#   "45 8 * * *"   → codziennie o 10:45 PL latem / 9:45 PL zimą
+#   "0 17 * * *"   → codziennie o 19:00 PL latem / 18:00 PL zimą
+#   "0 7 * * 1-5"  → tylko w dni robocze rano
+[triggers]
+crons = ["45 8 * * *"]
