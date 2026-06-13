@@ -2,7 +2,7 @@
 // Konfiguracja ankiety
 // =============================================================================
 const CONFIG = {
-  content: "<@&1491323320774430880>",
+  content: "<@&1491323320774430880> Misiaczki ogłaszamy wielką reaktywacje po 5 dniach bycia martwym, Igor obiecał się nie kłócić z nikim a ja obiecuje gałe każdemu kto dzisiaj wbije na among us. Także albo sobie dzisiaj zagramy albo sie zesramy. Powiedzcie babci dziadkowi mamie i tacie jeśli ich macie.",
   question: "Among us 20?",
   optionTexts: ["Będę", "Nie będę", "Nie wiem", "Będę o 21"],
   duration_hours: 24,
