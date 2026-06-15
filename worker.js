@@ -2,7 +2,7 @@
 // Konfiguracja ankiety
 // =============================================================================
 const CONFIG = {
-  content: "<@&1491323320774430880> Wróciłem i od dzisiaj będę waszym przewodnikiem",
+  content: "<@&1491323320774430880>",
   question: "Among us 20?",
   optionTexts: ["Będę", "Nie będę", "Nie wiem", "Będę o 21"],
   duration_hours: 24,
